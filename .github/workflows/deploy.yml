@@ -1,0 +1,97 @@
+name: CD Pipeline - Build & Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/charginggrid-web
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,value=${{ github.sha }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code (to get docker-compose.yml)
+        uses: actions/checkout@v3
+
+      - name: Set up SSH Key & Deploy docker-compose.yml via SCP
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+        run: |
+          # Write the private key to a local file
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Add the EC2 host to known_hosts to prevent verification warnings
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
+          
+          # Transfer only the docker-compose file to the target EC2 host
+          scp docker-compose.yml $USER@$HOST:/home/$USER/docker-compose.yml
+
+      - name: Pull image and run containers on EC2 via SSH
+        env:
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+          # To pull from a private GHCR registry, we pass user token info
+          GHCR_TOKEN: ${{ secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          ssh $USER@$HOST "
+            # Log in to GHCR on the EC2 host
+            echo '$GHCR_TOKEN' | docker login ${{ env.REGISTRY }} -u $GHCR_USER --password-stdin
+            
+            # Export repo owner so docker-compose pulls from the correct path
+            export GHCR_REPO_OWNER='$REPO_OWNER'
+            
+            # Navigate to directory and pull latest image
+            cd /home/$USER
+            docker compose pull
+            
+            # Up the containers
+            docker compose up -d
+            
+            # Clean up old unused images
+            docker image prune -f
+          "

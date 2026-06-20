@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChargingGrid - EV Charging Network Cloud Admin Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="glow-effect"></div>
+    <div class="glow-effect-2"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <!-- Bolt SVG -->
+                    <svg viewBox="0 0 24 24">
+                        <path d="M11 21h-1a1 1 0 0 1-1-1v-7H5a1 1 0 0 1-.84-1.54l7-10A1 1 0 0 1 13 3h1a1 1 0 0 1 1 1v7h4a1 1 0 0 1 .84 1.54l-7 10A1 1 0 0 1 11 21zm-1-8.5v5.86l4.9-7H13.5a1 1 0 0 1-1-1V4.64l-4.9 7H10a1 1 0 0 1 0 1z"/>
+                    </svg>
+                </div>
+                <span class="brand-title">ChargingGrid</span>
+            </div>
+
+            <!-- Role Based Access Control (RBAC) -->
+            <div class="rbac-selector">
+                <label class="rbac-label" for="rbacRole">Access Role Mode</label>
+                <select id="rbacRole" class="rbac-select" onchange="changeUserRole(this.value)">
+                    <option value="administrator">Cloud Administrator</option>
+                    <option value="operational_manager">Operations Manager</option>
+                    <option value="executive">Executive Director</option>
+                </select>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="nav-menu">
+                <div class="nav-item active" onclick="switchTab('dashboard', this)">
+                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('networking', this)">
+                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z"/></svg>
+                    <span>Cloud VPC Network</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('database', this)">
+                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C7.58 2 4 3.79 4 6v12c0 2.21 3.58 4 8 4s8-1.79 8-4V6c0-2.21-3.58-4-8-4zm0 2c3.87 0 6 1.43 6 2s-2.13 2-6 2-6-1.43-6-2 2.13-2 6-2zm0 6c3.87 0 6 1.43 6 2s-2.13 2-6 2-6-1.43-6-2 2.13-2 6-2zm0 6c3.87 0 6 1.43 6 2s-2.13 2-6 2-6-1.43-6-2 2.13-2 6-2z"/></svg>
+                    <span>DB Operations</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('linux-admin', this)">
+                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 12H4v-2h8v2zm8-4H4V6h16v6z"/></svg>
+                    <span>Linux & Containers</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('monitoring', this)">
+                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-4v2h4v2h-4v2h4v2H9V7h6v2z"/></svg>
+                    <span>CloudWatch Metrics</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('pricing', this)">
+                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
+                    <span>TCO Cost Estimator</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <span>VPC Status: <b class="trend-up">Healthy</b></span>
+                <span>Region: <b style="color:var(--primary)">us-east-1 (Primary)</b></span>
+                <span>DR Region: <b style="color:var(--warning)">us-west-2 (Standby)</b></span>
+            </div>
+        </aside>
+
+        <!-- Main View Space -->
+        <main class="main-content">
+            <!-- Header bar -->
+            <header>
+                <div class="page-title-section">
+                    <h1 id="view-title">Real-Time EV Operations Dashboard</h1>
+                    <p id="view-description">Consolidated operational metrics, fleet distribution, and network performance indicators.</p>
+                </div>
+                <div class="status-pills">
+                    <div class="status-pill">
+                        <span class="status-dot active"></span>
+                        <span>API Server: 200 OK</span>
+                    </div>
+                    <div class="status-pill">
+                        <span class="status-dot active" style="background-color: var(--primary)"></span>
+                        <span id="activeRoleText">Admin Mode</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <section id="dashboard" class="view-section active">
+                <div class="grid-4">
+                    <div class="card">
+                        <div class="card-header-row">
+                            <span class="card-title">Network Active Chargers</span>
+                            <span class="badge badge-success">Live</span>
+                        </div>
+                        <div class="card-value" id="stats-active-chargers">842 / 900</div>
+                        <div class="card-subtext">Across 5 US Operating Regions</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header-row">
+                            <span class="card-title">Total Power Draw</span>
+                            <span class="card-trend trend-up">▲ 14%</span>
+                        </div>
+                        <div class="card-value" id="stats-power-draw">3.84 MW</div>
+                        <div class="card-subtext">Avg charging output: 45.6 kW</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header-row">
+                            <span class="card-title">Occupancy Rate</span>
+                            <span class="card-trend trend-up">▲ 2.8%</span>
+                        </div>
+                        <div class="card-value" id="stats-occupancy">78.4%</div>
+                        <div class="card-subtext">Peak utilization window</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header-row">
+                            <span class="card-title">Daily Cloud Revenue</span>
+                            <span class="badge badge-primary">EOD</span>
+                        </div>
+                        <div class="card-value" id="stats-revenue">$24,192</div>
+                        <div class="card-subtext">Estimated current margin: 38%</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Live EV Station Monitoring Map/Status -->
+                    <div class="card">
+                        <h3>EV Station Geographic Distribution</h3>
+                        <p class="card-subtext" style="margin-bottom: 1rem;">Virtual deployment regions & network occupancy status.</p>
+                        <div style="display: flex; flex-direction: column; gap: 12px;" id="regions-container">
+                            <!-- Populated dynamically via app.js -->
+                        </div>
+                    </div>
+
+                    <!-- Alerts Box -->
+                    <div class="card">
+                        <div class="card-header-row">
+                            <h3>Active System Infrastructure Incidents</h3>
+                            <button class="btn btn-secondary" onclick="simulateAlert()">Trigger Test Alert</button>
+                        </div>
+                        <p class="card-subtext" style="margin-bottom: 1rem;">Cloudwatch / ECS agent logs monitoring thresholds.</p>
+                        <div id="incidents-container" style="display:flex; flex-direction:column; gap:10px; max-height:220px; overflow-y:auto;">
+                            <div class="status-pill" style="border: 1px solid var(--border-color); background: rgba(16,185,129,0.05);">
+                                <span class="status-dot active"></span>
+                                <span>[INFO] CloudWatch Agent initiated successfully on ECS cluster. (us-east-1)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Networking & Cloud VPC View -->
+            <section id="networking" class="view-section">
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-title">VPC Architecture Details</div>
+                        <p class="card-subtext" style="margin-top: 8px;">
+                            <strong>CIDR Block:</strong> 10.0.0.0/16<br>
+                            <strong>Subnet Strategy:</strong> Multi-AZ (us-east-1a, us-east-1b) isolation.<br>
+                            <strong>High Availability:</strong> Application Load Balancer routes traffic to Docker container nodes in private subnets via NAT Gateways.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Docker Cluster Orchestration</div>
+                        <p class="card-subtext" style="margin-top: 8px;">
+                            <strong>Registry:</strong> Docker Hub Private Repo<br>
+                            <strong>Cluster Engine:</strong> AWS ECS / Fargate<br>
+                            <strong>Containers running:</strong> Charging API Server, Websocket Session Manager, Real-time Metrics Collector.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Region Redundancy & DR</div>
+                        <p class="card-subtext" style="margin-top: 8px;">
+                            <strong>Primary Active:</strong> N. Virginia (us-east-1)<br>
+                            <strong>Secondary Hot-Standby:</strong> Oregon (us-west-2)<br>
+                            <strong>Failover Mechanism:</strong> Route 53 Latency + Failover routing policy. Database replication: RDS Aurora Multi-Region.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="vpc-viz-container">
+                    <h3 style="display:flex; justify-content:space-between; align-items:center;">
+                        Multi-Region VPC Subnet Layout & Nodes
+                        <span class="badge badge-primary">Interactive Graph</span>
+                    </h3>
+                    
+                    <div class="aws-region-box">
+                        <div class="region-title">
+                            <span>AWS Primary Region: us-east-1 (N. Virginia)</span>
+                            <span class="badge badge-success">Active Grid traffic</span>
+                        </div>
+
+                        <div class="vpc-box">
+                            <div class="vpc-title">ChargingGrid-VPC (10.0.0.0/16)</div>
+
+                            <div class="az-container">
+                                <!-- AZ-1a -->
+                                <div class="az-box">
+                                    <div class="az-title">Availability Zone: us-east-1a</div>
+                                    
+                                    <div class="subnet subnet-public">
+                                        <div class="subnet-title">Public Subnet A (10.0.1.0/24)</div>
+                                        <div class="node-group">
+                                            <div class="aws-node active" onclick="showNodeDetails('ALB-1', 'AWS Application Load Balancer - routing charger API payloads')">
+                                                <span>ALB-01</span>
+                                            </div>
+                                            <div class="aws-node active" onclick="showNodeDetails('NAT-1', 'NAT Gateway - enabling outbound private subnet traffic')">
+                                                <span>NAT-GW1</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="subnet subnet-private">
+                                        <div class="subnet-title">Private Subnet A (10.0.3.0/24)</div>
+                                        <div class="node-group">
+                                            <div class="aws-node active" onclick="showNodeDetails('ECS-Task-1', 'Docker ECS Container running Charging Session Manager')">
+                                                <span>docker-node-1a</span>
+                                            </div>
+                                            <div class="aws-node active" onclick="showNodeDetails('RDS-Primary', 'Aurora MySQL Database Instance (Writer Node)')">
+                                                <span>rds-mysql-writer</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- AZ-1b -->
+                                <div class="az-box">
+                                    <div class="az-title">Availability Zone: us-east-1b</div>
+                                    
+                                    <div class="subnet subnet-public">
+                                        <div class="subnet-title">Public Subnet B (10.0.2.0/24)</div>
+                                        <div class="node-group">
+                                            <div class="aws-node active" onclick="showNodeDetails('ALB-2', 'Standby Load Balancer node')">
+                                                <span>ALB-02</span>
+                                            </div>
+                                            <div class="aws-node active" onclick="showNodeDetails('NAT-2', 'NAT Gateway 2')">
+                                                <span>NAT-GW2</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="subnet subnet-private">
+                                        <div class="subnet-title">Private Subnet B (10.0.4.0/24)</div>
+                                        <div class="node-group">
+                                            <div class="aws-node active" onclick="showNodeDetails('ECS-Task-2', 'Docker ECS Container running Metrics ingestion daemon')">
+                                                <span>docker-node-1b</span>
+                                            </div>
+                                            <div class="aws-node active" onclick="showNodeDetails('RDS-Reader', 'Aurora MySQL Database Instance (Read Replica Node)')">
+                                                <span>rds-mysql-reader</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Details Box for Network Nodes -->
+                    <div class="card" id="network-node-details" style="background: rgba(255,255,255,0.02); display:none;">
+                        <h4 id="node-name" style="color:var(--primary);">Node Information</h4>
+                        <p id="node-desc" style="font-size:0.9rem; margin-top:4px;">Select an infrastructure node to view specifications.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Databases & Operations View -->
+            <section id="database" class="view-section">
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-title">Database Core State</div>
+                        <div class="card-value" style="font-size: 1.5rem; margin-top: 10px;" id="db-uptime">Online</div>
+                        <p class="card-subtext">MariaDB / RDS Cluster Engine V10.6</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Active Database Connections</div>
+                        <div class="card-value" style="font-size: 1.5rem; margin-top: 10px;">87 Sessions</div>
+                        <p class="card-subtext">Connection pool utilization at 43.5%</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Backup & Recovery Schedule</div>
+                        <div class="card-value" style="font-size: 1.5rem; margin-top: 10px;">Daily 02:00 UTC</div>
+                        <p class="card-subtext">Retention: 30 days. Backup storage: AWS S3 Glacier.</p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <div class="card-header-row">
+                        <h3>Operational records (Charging Sessions Logs)</h3>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn" onclick="openAddSessionModal()">+ New Session</button>
+                            <button class="btn btn-secondary" onclick="triggerDBBackup()">Trigger Live RDS Backup</button>
+                        </div>
+                    </div>
+                    
+                    <div class="db-table-container">
+                        <table class="db-table">
+                            <thead>
+                                <tr>
+                                    <th>Session ID</th>
+                                    <th>Station Name</th>
+                                    <th>Vehicle VIN</th>
+                                    <th>Energy Consumed (kWh)</th>
+                                    <th>Total Charged ($)</th>
+                                    <th>Timestamp</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="db-sessions-tbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Linux Administration & Containers View -->
+            <section id="linux-admin" class="view-section">
+                <div class="grid-2">
+                    <!-- Script Automation Suite -->
+                    <div class="card">
+                        <h3>Shell Script Automation Library</h3>
+                        <p class="card-subtext" style="margin-bottom: 1.25rem;">Execute predefined bash administrative scripts directly onto simulated instance clusters.</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="card" style="background: rgba(255,255,255,0.02); padding: 12px; cursor: pointer;" onclick="loadScript('backup')">
+                                <strong style="color:var(--primary)">1. rds_backup_s3.sh</strong>
+                                <p class="card-subtext" style="margin-top: 4px;">Executes a mysqldump backup of the MariaDB operational databases, compresses, and transfers to S3 Glacier storage tier.</p>
+                            </div>
+                            <div class="card" style="background: rgba(255,255,255,0.02); padding: 12px; cursor: pointer;" onclick="loadScript('upgrade')">
+                                <strong style="color:var(--success)">2. sys_package_upgrade.sh</strong>
+                                <p class="card-subtext" style="margin-top: 4px;">Updates local package registry lists and runs non-interactive system patches for target Linux OS nodes.</p>
+                            </div>
+                            <div class="card" style="background: rgba(255,255,255,0.02); padding: 12px; cursor: pointer;" onclick="loadScript('docker')">
+                                <strong style="color:var(--warning)">3. deploy_docker_container.sh</strong>
+                                <p class="card-subtext" style="margin-top: 4px;">Pulls newest charging API docker image, stops running tasks safely, spins up new health-checked application pods.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Simulated Terminal -->
+                    <div class="card" style="padding:0;">
+                        <div class="terminal-container">
+                            <div class="terminal-header">
+                                <div class="terminal-dots">
+                                    <div class="terminal-dot red"></div>
+                                    <div class="terminal-dot yellow"></div>
+                                    <div class="terminal-dot green"></div>
+                                </div>
+                                <div class="terminal-title">SSH Admin Console: admin@10.0.3.45 (us-east-1a)</div>
+                                <span class="badge badge-primary">zsh</span>
+                            </div>
+                            <div class="terminal-body" id="terminal-screen">
+                                <div class="terminal-line"><span class="terminal-prompt">admin@charginggrid-node-1a:~$</span> Welcome to ChargingGrid Cloud Administration console.</div>
+                                <div class="terminal-line">Authorized roles: Admin, Operational Manager.</div>
+                                <div class="terminal-line">Type 'help' to list available system commands.</div>
+                            </div>
+                            <div class="terminal-header" style="border-top:1px solid #1e293b; border-bottom:none;">
+                                <div class="terminal-input-row" style="width: 100%;">
+                                    <span class="terminal-prompt">admin@charginggrid:~$</span>
+                                    <input type="text" id="terminal-cmd-input" class="terminal-input" placeholder="Type a command and press Enter..." onkeydown="handleTerminalCommand(event)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Monitoring & CloudWatch Metrics View -->
+            <section id="monitoring" class="view-section">
+                <div class="grid-3">
+                    <div class="card">
+                        <h3>CPU Utilization (%)</h3>
+                        <p class="card-subtext">Average across Docker Container cluster instances.</p>
+                        <div class="graph-container" id="cpu-graph">
+                            <!-- Populated with divs dynamically -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>RAM Utilization (%)</h3>
+                        <p class="card-subtext">Active memory usage across ECS container tasks.</p>
+                        <div class="graph-container" id="ram-graph">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Network Outbound Traffic (MB/s)</h3>
+                        <p class="card-subtext">Network activity transmitting charging session logs.</p>
+                        <div class="graph-container" id="network-graph">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Configure Infrastructure Alerts</h3>
+                        <p class="card-subtext" style="margin-bottom: 1rem;">Establish warning / critical threshold rules to dispatch SNS PagerDuty alerts.</p>
+                        
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+                            <div>
+                                <label style="display:block; font-size:0.85rem; margin-bottom:4px;">CPU Alert Threshold (%):</label>
+                                <div style="display:flex; gap:10px; align-items:center;">
+                                    <input type="range" class="slider-control" min="50" max="95" value="85" id="cpu-alert-slider" oninput="updateAlertThresholdText()">
+                                    <span id="cpu-alert-value" style="font-weight:700;">85%</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Memory Threshold Limit (%):</label>
+                                <div style="display:flex; gap:10px; align-items:center;">
+                                    <input type="range" class="slider-control" min="50" max="95" value="90" id="ram-alert-slider" oninput="updateAlertThresholdText()">
+                                    <span id="ram-alert-value" style="font-weight:700;">90%</span>
+                                </div>
+                            </div>
+                            <button class="btn" style="margin-top: 10px;" onclick="saveAlertConfigurations()">Save CloudWatch Alert Config</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Application Daemon Log Streams</h3>
+                        <p class="card-subtext" style="margin-bottom: 1rem;">Docker service std-out logs routing to AWS CloudWatch Logs.</p>
+                        <div style="background: #020617; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; height: 180px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: #10b981;" id="live-logs-container">
+                            <!-- Live logs added dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AWS TCO Pricing Estimator View -->
+            <section id="pricing" class="view-section">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>AWS Operational TCO Estimator</h3>
+                        <p class="card-subtext" style="margin-bottom: 1.5rem;">Configure regional expansion size to forecast compute, storage, backup, and failover network costs.</p>
+                        
+                        <div class="pricing-calculator">
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <span>Scale (Docker Pod count)</span>
+                                    <span id="scale-count-text">2 instances</span>
+                                </div>
+                                <input type="range" class="slider-control" min="2" max="50" value="4" id="slider-instances" oninput="calculateAWSPricing()">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <span>Storage Volume size (RDS + S3 - TB)</span>
+                                    <span id="storage-size-text">1 TB</span>
+                                </div>
+                                <input type="range" class="slider-control" min="1" max="100" value="5" id="slider-storage" oninput="calculateAWSPricing()">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <span>SLA Reliability Target & Redundancy</span>
+                                    <span id="sla-tier-text">Single AZ (99.9%)</span>
+                                </div>
+                                <select id="select-sla" class="rbac-select" style="background:#0f172a;" onchange="calculateAWSPricing()">
+                                    <option value="single-az">Single AZ - Basic (99.9% SLA)</option>
+                                    <option value="multi-az">Multi-AZ HA - Replicated (99.99% SLA)</option>
+                                    <option value="multi-region">Multi-Region Disaster Recovery (99.999% SLA)</option>
+                                </select>
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <span>Network Ingress/Egress Bandwidth (GB/mo)</span>
+                                    <span id="bandwidth-text">500 GB</span>
+                                </div>
+                                <input type="range" class="slider-control" min="100" max="5000" step="100" value="1000" id="slider-bandwidth" oninput="calculateAWSPricing()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="cost-display">
+                            <div class="card-title" style="color:var(--text-main); font-weight:700;">Estimated AWS Infrastructure Cost</div>
+                            <div class="cost-amount" id="total-aws-cost">$184.00</div>
+                            <div class="cost-frequency">Per Month Estimated Bill</div>
+                        </div>
+
+                        <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Cost Optimization Recommendations</h4>
+                        <div style="background: rgba(255,255,255,0.02); border-left: 3px solid var(--primary); padding: 10px; margin-bottom: 10px; font-size: 0.85rem;" id="opt-tip-1">
+                            Use AWS Savings Plans for container instances to save up to 72% on compute costs.
+                        </div>
+                        <div style="background: rgba(255,255,255,0.02); border-left: 3px solid var(--success); padding: 10px; font-size: 0.85rem;" id="opt-tip-2">
+                            Implement lifecycle policies on Amazon S3 to transition older logs to S3 Glacier Deep Archive.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals for DB operations -->
+    <div id="addSessionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+        <div class="card" style="width:400px; background:#1e293b; border: 1px solid var(--border-color);">
+            <h3 style="margin-bottom:1rem;">Add New Simulated Charging Session</h3>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <div>
+                    <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Station Name:</label>
+                    <select id="modal-station-name" class="rbac-select">
+                        <option value="Metro Depot FastCharger 1A">Metro Depot FastCharger 1A</option>
+                        <option value="Highway 101 Hub">Highway 101 Hub</option>
+                        <option value="Downtown Plaza Level 2">Downtown Plaza Level 2</option>
+                        <option value="Airport Terminal B Zone 1">Airport Terminal B Zone 1</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Vehicle VIN/ID:</label>
+                    <input type="text" id="modal-vehicle-vin" class="rbac-select" value="1FTFW1ED8N21034">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Energy Consumed (kWh):</label>
+                    <input type="number" id="modal-energy" class="rbac-select" value="38.5">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.85rem; margin-bottom:4px;">Total Cost ($):</label>
+                    <input type="number" id="modal-cost" class="rbac-select" value="15.40">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                    <button class="btn btn-secondary" onclick="closeAddSessionModal()">Cancel</button>
+                    <button class="btn" onclick="saveNewSession()">Insert Record</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  charginggrid-web:
+    image: ghcr.io/${GHCR_REPO_OWNER:-username}/charginggrid-web:latest
+    container_name: charginggrid-web-server
+    ports:
+      - "80:8000"
+    restart: always
+    environment:
+      - PORT=8000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
